@@ -16,7 +16,8 @@ import {
   isBoolean,
   isPlainObject,
   makeSymbol,
-  isObject
+  isObject,
+  hasOwn
 } from '@intlify/shared'
 import {
   resolveValue,
@@ -32,7 +33,8 @@ import {
   parseNumberArgs,
   clearNumberFormat,
   NOT_REOSLVED,
-  DevToolsTimelineEvents
+  DevToolsTimelineEvents,
+  handleFlatJson
 } from '@intlify/core-base'
 import { I18nWarnCodes, getWarnMessage } from './warnings'
 import { I18nErrorCodes, createI18nError } from './errors'
@@ -961,13 +963,14 @@ export function getLocaleMessages<Message = VueMessageType>(
     })
   }
 
-  return ret
-}
+  // handle messages for flat json
+  for (const key in ret) {
+    if (hasOwn(ret, key)) {
+      handleFlatJson(ret[key])
+    }
+  }
 
-const hasOwnProperty = Object.prototype.hasOwnProperty
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function hasOwn(obj: object | Array<any>, key: string): boolean {
-  return hasOwnProperty.call(obj, key)
+  return ret
 }
 
 const isNotObjectOrIsArray = (val: unknown) => !isObject(val) || isArray(val)
